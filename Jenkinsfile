@@ -1,0 +1,45 @@
+pipeline {
+    agent {
+        node {
+            label 'QA'
+            customWorkspace '/mnt/web-server'
+        }
+    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                script {
+                    deleteDir()
+                }
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                script {
+                    def tomcatDir = "/mnt/web-server/apache-tomcat-9.0.89"
+                    if (fileExists(tomcatDir)) {
+                        sh "rm -rf ${tomcatDir}"
+                    }
+                }
+            }
+        }
+        stage('Install') {
+            steps {
+                sh "wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.zip"
+                sh "unzip apache-tomcat-9.0.89.zip"
+                sh "rm -rf apache-tomcat-9.0.89.zip"
+            }
+        }
+        stage('Set Permissions') {
+            steps {
+                sh "chmod -R 777 /mnt/web-server/apache-tomcat-9.0.89"
+            }
+        }
+        stage('Start') {
+            steps {
+                sh "/mnt/web-server/apache-tomcat-9.0.89/bin/startup.sh"
+            }
+        }
+    }
+}
+
