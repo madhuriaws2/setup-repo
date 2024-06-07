@@ -1,0 +1,50 @@
+pipeline {
+    agent {
+        node {
+            label 'QA'
+            customWorkspace '/mnt/build-tool'
+        }
+    }
+
+    environment {
+        MAVEN_HOME = '/mnt/build-tool/apache-maven-3.9.7'
+        M2_HOME = '/mnt/build-tool/apache-maven-3.9.7'
+        M2 = '/mnt/build-tool/apache-maven-3.9.7/bin'
+        PATH = "/mnt/build-tool/apache-maven-3.9.7/bin:$PATH"
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                script {
+                    deleteDir()
+                }
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                script {
+                    def mavenDir = "/mnt/build-tool"
+                    if (fileExists(mavenDir)) {
+                        sh "rm -rf ${mavenDir}"
+                    }
+                }
+            }
+        }
+        stage('Install') {
+            steps {
+                sh "wget https://dlcdn.apache.org/maven/maven-3/3.9.7/binaries/apache-maven-3.9.7-bin.zip"
+                sh "unzip apache-maven-3.9.7-bin.zip"
+                sh "rm -rf apache-maven-3.9.7-bin.zip"
+            }
+        }
+        
+        stage('give-permission') {
+            steps {
+                
+                sh "chmod -R 777 /mnt/build-tool"
+            }
+        }
+    }
+}
+
