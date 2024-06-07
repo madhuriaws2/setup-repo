@@ -16,7 +16,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    def tomcatDir = "/mnt/web-server/apache-tomcat-9.0.89"
+                    def tomcatDir = "/mnt/web-server"
                     if (fileExists(tomcatDir)) {
                         sh "rm -rf ${tomcatDir}"
                     }
