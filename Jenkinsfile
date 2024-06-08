@@ -1,10 +1,18 @@
-pipeline {
+     pipeline {
     agent {
         node {
-            label 'QA'
-            customWorkspace '/mnt/web-server'
+            label 'built-in'
+            customWorkspace '/mnt/project'
         }
     }
+
+    environment {
+        MAVEN_HOME = '/mnt/build-tool/apache-maven-3.9.7'
+        M2_HOME = '/mnt/build-tool/apache-maven-3.9.7'
+        M2 = '/mnt/build-tool/apache-maven-3.9.7/bin'
+        PATH = "/mnt/build-tool/apache-maven-3.9.7/bin:$PATH"
+    }
+
     stages {
         stage('Clean Workspace') {
             steps {
@@ -16,30 +24,29 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    def tomcatDir = "/mnt/web-server/apache-tomcat-9.0.89"
-                    if (fileExists(tomcatDir)) {
-                        sh "rm -rf ${tomcatDir}"
+                    def buildDir = "/mnt/project"
+                    if (fileExists(buildDir)) {
+                        sh "rm -rf ${buildDir}"
                     }
                 }
             }
         }
-        stage('Install') {
+        stage('Clone Repository') {
             steps {
-                sh "wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.zip"
-                sh "unzip apache-tomcat-9.0.89.zip"
-                sh "rm -rf apache-tomcat-9.0.89.zip"
+                git url: 'https://github.com/madhuriaws2/webapp.git', branch: 'master'
             }
         }
-        stage('Set Permissions') {
+        stage('Build Project') {
             steps {
-                sh "chmod -R 777 /mnt/web-server/apache-tomcat-9.0.89"
+                sh 'mvn clean install'
             }
         }
-        stage('Start') {
+        stage('Post Build Actions') {
             steps {
-                sh "/mnt/web-server/apache-tomcat-9.0.89/bin/startup.sh"
+                sh 'cp -r /mnt/project/target/WebApp.war /mnt/web-server/apache-tomcat-9.0.89/webapps'
+                
             }
         }
-    }
+	}	
+  
 }
-
