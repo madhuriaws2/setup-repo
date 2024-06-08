@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label 'QA'
+            label 'built-in'
             customWorkspace '/mnt/build-tool'
         }
     }
@@ -24,7 +24,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    def mavenDir = "/mnt/build-tool"
+                    def mavenDir = "/mnt/build-tool/apache-maven-3.9.7"
                     if (fileExists(mavenDir)) {
                         sh "rm -rf ${mavenDir}"
                     }
@@ -38,13 +38,31 @@ pipeline {
                 sh "rm -rf apache-maven-3.9.7-bin.zip"
             }
         }
-        
-        stage('give-permission') {
+        stage('Update .bashrc') {
             steps {
-                
-                sh "chmod -R 777 /mnt/build-tool"
+                script {
+                    sh '''
+                    echo 'export MAVEN_HOME=/mnt/build-tool/apache-maven-3.9.7' >> ~/.bashrc
+                    echo 'export M2_HOME=/mnt/build-tool/apache-maven-3.9.7' >> ~/.bashrc
+                    echo 'export M2=/mnt/build-tool/apache-maven-3.9.7/bin' >> ~/.bashrc
+                    echo 'export PATH=/mnt/build-tool/apache-maven-3.9.7/bin:$PATH' >> ~/.bashrc
+                    source ~/.bashrc
+                    '''
+                }
+            }
+        }
+        stage('Give Permissions') {
+            steps {
+                sh "chmod -R 777 /mnt/build-tool/apache-maven-3.9.7"
+            }
+        }
+        stage('Verify Maven Installation') {
+            steps {
+                sh '''
+                export PATH=/mnt/build-tool/apache-maven-3.9.7/bin:$PATH
+                mvn -version
+                '''
             }
         }
     }
 }
-
