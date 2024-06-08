@@ -44,10 +44,18 @@ pipeline {
         stage('Post Build Actions') {
             steps {
                 sh 'cp -r /mnt/project/target/WebApp.war /mnt/web-server/apache-tomcat-9.0.89/webapps'
-                
+            }
+        }
+        stage('Upload to S3') {
+            steps {
+                script {
+                    s3Upload(bucket: 'war-file-bucket1', file: '/mnt/project/target/WebApp.war')
+                }
             }
         }
     }	
-  
 }
+
+     
+
 
