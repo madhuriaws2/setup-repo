@@ -1,4 +1,4 @@
-     pipeline {
+pipeline {
     agent {
         node {
             label 'built-in'
@@ -14,7 +14,7 @@
     }
 
     stages {
-        stage('Clean Workspace') {
+       stage('Clean Workspace') {
             steps {
                 script {
                     deleteDir()
@@ -47,6 +47,7 @@
                 
             }
         }
-	}	
+     	
   
 }
+
